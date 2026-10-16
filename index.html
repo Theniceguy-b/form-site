@@ -1,1 +1,391 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORM — Robot Customization</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#fff; --text:#111; --muted:#666; --border:#e5e5e5; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  nav {
+    position:sticky; top:0; z-index:100; background:#fff; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center; padding:1rem 2.5rem;
+  }
+  .logo { font-weight:700; letter-spacing:-0.03em; font-size:1.25rem; cursor:pointer; }
+  .nav-links { display:flex; align-items:center; gap:1.2rem; }
+  #search { padding:0.45rem 0.7rem; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; width:140px; }
+  .hamburger { display:none; background:none; border:none; font-size:1.5rem; cursor:pointer; }
+  @media (max-width:700px) {
+    .hamburger { display:block; }
+    .nav-links {
+      display:none; position:absolute; top:100%; left:0; right:0; background:#fff;
+      flex-direction:column; align-items:stretch; padding:1rem; border-bottom:1px solid var(--border);
+      gap:0.8rem; box-shadow:0 4px 12px rgba(0,0,0,0.06); z-index:101;
+    }
+    .nav-links.open { display:flex; }
+    #search { width:100%; }
+    .dropdown-menu { position:static; box-shadow:none; border:none; margin:0.3rem 0 0 0.5rem; }
+  }
+  .nav-links a, .dropdown-btn { color:#111; text-decoration:none; font-size:0.95rem; font-weight:500; background:none; border:none; cursor:pointer; font-family:inherit; }
+  .dropdown { position:relative; }
+  .dropdown-menu { display:none; position:absolute; top:100%; left:0; background:#fff; border:1px solid var(--border); border-radius:8px; min-width:160px; padding:0.4rem 0; margin-top:0.4rem; box-shadow:0 4px 12px rgba(0,0,0,0.06); z-index:101; }
+  .dropdown.open .dropdown-menu { display:block; }
+  .dropdown-menu a { display:block; padding:0.55rem 1rem; }
+  .dropdown-menu a:hover { background:#fafafa; }
+  .cart-btn { background:#111; color:#fff; border:none; padding:0.55rem 1.1rem; border-radius:6px; cursor:pointer; font-weight:500; }
+
+  .page { display:none; }
+  .page.active { display:block; }
+
+  .hero {
+    min-height:100vh; background:linear-gradient(135deg,#e8e4df 0%,#f5f2ee 50%,#ddd8d0 100%);
+    display:flex; align-items:center; padding:4rem 3rem;
+    position:fixed; top:60px; left:0; right:0; z-index:1;
+  }
+  .hero-content { max-width:640px; }
+  .hero h1 { font-size:clamp(2.6rem,5.5vw,4rem); font-weight:700; letter-spacing:-0.04em; line-height:1.05; margin-bottom:1rem; }
+  .hero p { font-size:1.15rem; color:#444; margin-bottom:1.5rem; max-width:480px; }
+
+  .section { padding:4rem 2.5rem; }
+  .about-section {
+    background:#fff; transform:skewY(4deg); margin-top:calc(100vh - 60px);
+    padding:12rem 2.5rem 12rem; position:relative; z-index:2;
+    box-shadow:0 -16px 40px rgba(0,0,0,0.08);
+    min-height:70vh;
+  }
+  .about-section > * { transform:skewY(-4deg); }
+  .featured-section { position:relative; z-index:2; margin-top:110vh; background:#fafafa; }
+  .layer-two {
+    min-height:100vh; background:linear-gradient(160deg,#2c2c2c 0%,#4a4a4a 100%);
+    color:#fff; display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:4rem 2rem; position:fixed; top:60px; left:0; right:0; z-index:1;
+    opacity:0; pointer-events:none; transition:opacity .15s;
+  }
+  .layer-two.visible { opacity:1; }
+  .layer-two-content h2 { font-size:clamp(2.2rem,5vw,3.5rem); font-weight:700; letter-spacing:-0.03em; margin-bottom:1rem; }
+  .layer-two-content p { font-size:1.15rem; max-width:480px; color:#ddd; }
+
+  .section h2 { font-size:2rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:0.5rem; }
+  .section .sub { color:var(--muted); margin-bottom:2rem; max-width:560px; }
+  .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; margin-top:1rem; }
+  @media (max-width:700px) { .about-grid { grid-template-columns:1fr; } }
+  .about-text p { margin-bottom:1rem; color:#444; line-height:1.6; }
+
+  .product-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; max-width:1400px; margin:0 auto; }
+  @media (min-width:1200px) {
+    .product-grid { grid-template-columns:repeat(4,1fr); }
+  }
+  @media (min-width:900px) and (max-width:1199px) {
+    .product-grid { grid-template-columns:repeat(3,1fr); }
+  }
+  .product { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:#fff; transition:box-shadow .2s; cursor:pointer; }
+  .product:hover { box-shadow:0 8px 24px rgba(0,0,0,0.06); }
+  .placeholder { width:100%; height:240px; background:#e8e8e8; display:flex; align-items:center; justify-content:center; color:#999; font-size:0.9rem; }
+  .product .info { padding:1.1rem; }
+  .product h3 { font-size:1rem; font-weight:600; margin-bottom:0.25rem; }
+  .price { font-size:1rem; color:#111; margin-bottom:0.6rem; }
+
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:300; display:none; align-items:center; justify-content:center; padding:1rem; }
+  .modal.open { display:flex; }
+  .modal-content { background:#fff; border-radius:12px; max-width:720px; width:100%; max-height:90vh; overflow-y:auto; padding:2rem; }
+  .modal-close { float:right; background:none; border:none; font-size:1.5rem; cursor:pointer; }
+  .option-group { margin-bottom:1.2rem; }
+  .option-group label { display:block; font-weight:600; margin-bottom:0.4rem; font-size:0.95rem; }
+  .swatches, .pieces { display:flex; flex-wrap:wrap; gap:0.5rem; }
+  .swatch, .piece { border:1px solid #ddd; padding:0.5rem 0.8rem; border-radius:6px; cursor:pointer; font-size:0.9rem; background:#fff; }
+  .swatch.selected, .piece.selected { border-color:#111; background:#111; color:#fff; }
+  .add-detail { width:100%; background:#111; color:#fff; border:none; padding:0.9rem; border-radius:6px; font-weight:600; cursor:pointer; margin-top:1rem; }
+
+  .cart-drawer { position:fixed; top:0; right:-420px; width:400px; height:100vh; background:#fff; border-left:1px solid var(--border); z-index:200; padding:1.5rem; transition:right .35s; overflow-y:auto; }
+  .cart-drawer.open { right:0; }
+  .cart-item { display:flex; justify-content:space-between; padding:0.8rem 0; border-bottom:1px solid var(--border); font-size:0.95rem; }
+  .checkout-btn { width:100%; background:#111; color:#fff; border:none; padding:1rem; border-radius:6px; margin-top:1rem; font-weight:600; cursor:pointer; }
+
+  .checkout-page { display:none; max-width:640px; margin:3rem auto; padding:2rem; background:#fff; border:1px solid var(--border); border-radius:12px; }
+  .checkout-page.active { display:block; }
+  .checkout-item { display:flex; justify-content:space-between; padding:0.9rem 0; border-bottom:1px solid var(--border); }
+  .total-row { display:flex; justify-content:space-between; font-weight:700; font-size:1.15rem; margin:1.2rem 0; }
+  .shipping-options { margin:1.2rem 0; }
+  .shipping-option { border:1px solid #ddd; border-radius:8px; padding:0.9rem; margin-bottom:0.6rem; cursor:pointer; }
+  .shipping-option.selected { border-color:#111; background:#fafafa; }
+  .btn { width:100%; background:#111; color:#fff; border:none; padding:1rem; border-radius:6px; font-weight:600; cursor:pointer; margin-top:1rem; }
+  .btn-secondary { background:#fff; color:#111; border:1px solid #111; }
+
+  footer { background:#111; color:#ccc; padding:3rem 2.5rem; position:relative; z-index:4; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="showPage('home')">FORM</div>
+  <button class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+  <div class="nav-links">
+    <input type="text" id="search" placeholder="Search..." oninput="filterProducts(this.value)">
+    <div class="dropdown" id="shop-dropdown">
+      <button class="dropdown-btn" onclick="toggleDropdown()">Shop ▾</button>
+      <div class="dropdown-menu">
+        <a href="#" onclick="showPage('all'); return false;">All</a>
+        <a href="#" onclick="showPage('covers'); return false;">3D Covers</a>
+        <a href="#" onclick="showPage('wrap'); return false;">Wraps</a>
+      </div>
+    </div>
+    <a href="#" onclick="scrollToAbout(); return false;">About</a>
+    <button class="cart-btn" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</button>
+  </div>
+</nav>
+
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Custom covers and wraps for personal robots.</h1>
+      <p>Clip-on 3D pieces and precision wraps for self-expression. Designed to stay clear of joints and sensors.</p>
+    </div>
+  </section>
+
+  <section class="section about-section">
+    <h2>About the products</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>Our 3D covers are lightweight, clip-on pieces made from durable matte plastic. They sit outside the robot’s moving parts so they don’t interfere with motion or sensors. Each set is shaped for a specific look — soft and playful, clean and minimal, or more ornate.</p>
+        <p>Wraps are precision-cut sticker kits. Solid colors for a clean finish, or patterns for more graphic looks. They go on and come off without leaving residue.</p>
+      </div>
+      <div class="about-text">
+        <p>Materials are chosen for low weight and easy cleaning. The covers are designed to be swapped, so the same robot can change appearance without tools.</p>
+        <p>FORM is a small studio focused on aftermarket customization for personal humanoid robots. We design the pieces, then work with low-volume manufacturers for wrap cutting and 3D printing.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="layer-two">
+    <div class="layer-two-content">
+      <h2>Designed to be swapped.</h2>
+      <p>Lightweight pieces that change the look without tools or permanent changes.</p>
+    </div>
+  </div>
+
+  <section class="section featured-section">
+    <h2>Featured</h2>
+    <p style="margin-bottom:1.5rem;"><a href="#" onclick="showPage('all'); return false;" style="color:#111; font-weight:500; text-decoration:underline;">View all in shop →</a></p>
+    <div class="product-grid">
+      <div class="product" onclick="openProduct(4)"><div class="placeholder">Whimsical</div><div class="info"><h3>Whimsical Cover Set</h3><div class="price">$349</div></div></div>
+      <div class="product" onclick="openProduct(5)"><div class="placeholder">Sleek</div><div class="info"><h3>Sleek Cover Set</h3><div class="price">$349</div></div></div>
+      <div class="product" onclick="openProduct(7)"><div class="placeholder">Victorian</div><div class="info"><h3>Victorian Cover Set</h3><div class="price">$349</div></div></div>
+      <div class="product" onclick="openProduct(10)"><div class="placeholder">Matte Black</div><div class="info"><h3>Matte Black</h3><div class="price">$79</div></div></div>
+    </div>
+  </section>
+</div>
+
+<div class="page" id="page-all">
+  <section class="section">
+    <h2>All Products</h2>
+    <p class="sub">3D covers and wraps.</p>
+    <h3 style="margin:2rem 0 1rem; font-size:1.25rem;">3D Covers</h3>
+    <div class="product-grid" id="all-covers"></div>
+    <h3 style="margin:2.5rem 0 1rem; font-size:1.25rem;">Wraps</h3>
+    <div class="product-grid" id="all-wraps"></div>
+  </section>
+</div>
+<div class="page" id="page-covers">
+  <section class="section"><h2>3D Cover Sets</h2><p class="sub">Three styles. Full set includes a headpiece. Individual pieces available.</p><div class="product-grid" id="covers-grid"></div></section>
+</div>
+<div class="page" id="page-wrap">
+  <section class="section"><h2>Wraps</h2><p class="sub">Solid colors and patterns.</p><div class="product-grid" id="wrap-grid"></div></section>
+</div>
+
+<div class="checkout-page" id="checkout-review">
+  <h2>Checkout</h2>
+  <div id="checkout-items"></div>
+  <div class="shipping-options">
+    <div class="shipping-option selected" onclick="selectShipping(this, 0)">Standard Shipping — Free</div>
+    <div class="shipping-option" onclick="selectShipping(this, 12)">Express Shipping — $12</div>
+    <div class="shipping-option" onclick="selectShipping(this, 25)">Overnight Shipping — $25</div>
+  </div>
+  <div class="total-row"><span>Total</span><span id="checkout-total">$0</span></div>
+  <button class="btn" onclick="goToPayment()">Continue to Payment</button>
+</div>
+<div class="checkout-page" id="checkout-payment">
+  <h2>Payment</h2>
+  <p style="color:#666; margin-bottom:1rem; font-size:0.95rem;">Payments processed securely with Square.</p>
+  <input placeholder="Card number" style="width:100%; padding:0.85rem; margin:0.5rem 0; border:1px solid #ddd; border-radius:6px;">
+  <div style="display:flex; gap:0.5rem;">
+    <input placeholder="MM/YY" style="flex:1; padding:0.85rem; border:1px solid #ddd; border-radius:6px;">
+    <input placeholder="CVC" style="flex:1; padding:0.85rem; border:1px solid #ddd; border-radius:6px;">
+  </div>
+  <input placeholder="Name on card" style="width:100%; padding:0.85rem; margin:0.5rem 0; border:1px solid #ddd; border-radius:6px;">
+  <h3 style="margin:1.2rem 0 0.6rem;">Shipping Address</h3>
+  <input placeholder="Full name" style="width:100%; padding:0.85rem; margin:0.4rem 0; border:1px solid #ddd; border-radius:6px;">
+  <input placeholder="Address" style="width:100%; padding:0.85rem; margin:0.4rem 0; border:1px solid #ddd; border-radius:6px;">
+  <input placeholder="City" style="width:100%; padding:0.85rem; margin:0.4rem 0; border:1px solid #ddd; border-radius:6px;">
+  <select style="width:100%; padding:0.85rem; margin:0.4rem 0; border:1px solid #ddd; border-radius:6px;"><option>United States</option><option>Canada</option></select>
+  <div class="total-row"><span>Total</span><span id="payment-total">$0</span></div>
+  <button class="btn" onclick="placeOrder()">Place Order</button>
+  <button class="btn btn-secondary" onclick="backToReview()">Back</button>
+</div>
+<div class="checkout-page" id="checkout-confirm">
+  <h2>Order Placed</h2>
+  <p style="margin:1rem 0; color:#555;">Your order has been received. This is a demo — no charge was made.</p>
+  <button class="btn" onclick="backToShop()">Back to Shop</button>
+</div>
+
+<div class="cart-drawer" id="cart">
+  <h3 style="margin-bottom:1rem;">Cart</h3>
+  <div id="cart-items"></div>
+  <div id="cart-total" style="margin-top:1rem; font-weight:600;"></div>
+  <button class="checkout-btn" onclick="startCheckout()">Checkout</button>
+</div>
+
+<div class="modal" id="product-modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<footer>
+  <div style="max-width:960px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:2rem;">
+    <div><div style="color:#fff; font-weight:600; margin-bottom:0.6rem;">FORM</div><p style="font-size:0.9rem; line-height:1.5;">Custom covers and wraps for personal humanoid robots.</p></div>
+    <div><div style="color:#fff; font-weight:600; margin-bottom:0.6rem;">Shop</div><div style="font-size:0.9rem; line-height:1.8;">
+  <div><a href="#" onclick="showPage('all'); return false;" style="color:#ccc; text-decoration:none;">All</a></div>
+  <div><a href="#" onclick="showPage('covers'); return false;" style="color:#ccc; text-decoration:none;">3D Covers</a></div>
+  <div><a href="#" onclick="showPage('wrap'); return false;" style="color:#ccc; text-decoration:none;">Wraps</a></div>
+</div></div>
+    <div><div style="color:#fff; font-weight:600; margin-bottom:0.6rem;">Contact Us</div><div style="font-size:0.9rem; line-height:1.8;"><div>hello@form.studio</div><div>Instagram</div><div>Support</div></div></div>
+  </div>
+  <div style="text-align:center; margin-top:2rem; font-size:0.8rem; color:#888;">Conceptual demo. Products not for sale.</div>
+</footer>
+
+<script>
+const products = [
+  { id:10, name:"Matte Black", price:79, type:"wrap", color:"Matte Black", category:"wrap" },
+  { id:11, name:"White", price:79, type:"wrap", color:"White", category:"wrap" },
+  { id:12, name:"Slate", price:79, type:"wrap", color:"Slate", category:"wrap" },
+  { id:13, name:"Olive", price:79, type:"wrap", color:"Olive", category:"wrap" },
+  { id:14, name:"Navy", price:79, type:"wrap", color:"Navy", category:"wrap" },
+  { id:15, name:"Geometric Black", price:89, type:"wrap", color:"Geometric Black", category:"wrap" },
+  { id:16, name:"Abstract Lines", price:89, type:"wrap", color:"Abstract Lines", category:"wrap" },
+  { id:17, name:"Dot Grid", price:89, type:"wrap", color:"Dot Grid", category:"wrap" },
+  { id:4, name:"Whimsical Cover Set", price:349, type:"cover", style:"Whimsical", pieces:["Chest","Shoulders","Limbs","Full Set (includes headpiece)"], category:"covers" },
+  { id:5, name:"Sleek Cover Set", price:349, type:"cover", style:"Sleek", pieces:["Chest","Shoulders","Limbs","Full Set (includes headpiece)"], category:"covers" },
+  { id:7, name:"Victorian Cover Set", price:349, type:"cover", style:"Victorian", pieces:["Chest","Shoulders","Limbs","Full Set (includes headpiece)"], category:"covers" }
+];
+
+let cart = [], currentProduct = null, selectedOptions = {}, shippingCost = 0;
+
+function scrollToAbout() {
+  showPage('home');
+  setTimeout(() => {
+    const about = document.querySelector('.about-section');
+    if (about) about.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.checkout-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('shop-dropdown').classList.remove('open');
+  window.scrollTo(0,0);
+}
+function toggleDropdown() { document.getElementById('shop-dropdown').classList.toggle('open'); }
+
+function renderCategoryGrids() {
+  const coverHTML = products.filter(p => p.category === 'covers').map(p => `
+    <div class="product" onclick="openProduct(${p.id})"><div class="placeholder">${p.style||'Cover'}</div><div class="info"><h3>${p.name}</h3><div class="price">$${p.price}</div></div></div>`).join('');
+  const wrapHTML = products.filter(p => p.category === 'wrap').map(p => `
+    <div class="product" onclick="openProduct(${p.id})"><div class="placeholder">${p.color}</div><div class="info"><h3>${p.name}</h3><div class="price">$${p.price}</div></div></div>`).join('');
+  document.getElementById('covers-grid').innerHTML = coverHTML;
+  document.getElementById('wrap-grid').innerHTML = wrapHTML;
+  document.getElementById('all-covers').innerHTML = coverHTML;
+  document.getElementById('all-wraps').innerHTML = wrapHTML;
+}
+
+function openProduct(id) {
+  currentProduct = products.find(p => p.id === id);
+  selectedOptions = {};
+  let optionsHTML = '';
+  if (currentProduct.type === 'wrap') {
+    optionsHTML = `<div class="option-group"><label>Coverage</label><div class="pieces">
+      ${['Full Set','Chest only','Shoulders only','Limbs only','Headpiece only'].map(c => `<div class="piece" onclick="selectOption('coverage','${c}',this)">${c}</div>`).join('')}
+    </div></div>`;
+  } else if (currentProduct.type === 'cover') {
+    optionsHTML = `<div class="option-group"><label>Pieces</label><div class="pieces">
+      ${currentProduct.pieces.map(p => `<div class="piece" onclick="selectOption('piece','${p}',this)">${p}</div>`).join('')}
+    </div></div>
+    <div class="option-group"><label>Finish</label><div class="swatches">
+      ${['Matte Black','White','Soft Gray'].map(f => `<div class="swatch" onclick="selectOption('finish','${f}',this)">${f}</div>`).join('')}
+    </div></div>`;
+  }
+  document.getElementById('modal-body').innerHTML = `
+    <h2 style="margin-bottom:0.4rem;">${currentProduct.name}</h2>
+    <div class="price" style="font-size:1.2rem; margin-bottom:1rem;">$${currentProduct.price}</div>
+    <div class="placeholder" style="height:200px; margin-bottom:1rem;">Product image</div>
+    ${optionsHTML}
+    <button class="add-detail" onclick="addConfiguredToCart()">Add to cart</button>`;
+  document.getElementById('product-modal').classList.add('open');
+}
+function selectOption(key, value, el) {
+  selectedOptions[key] = value;
+  el.parentElement.querySelectorAll('.swatch,.piece').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function addConfiguredToCart() {
+  if (!currentProduct) return;
+  cart.push({ ...currentProduct, options:{...selectedOptions},
+    displayName: currentProduct.name + (selectedOptions.coverage ? ' — '+selectedOptions.coverage : '') + (selectedOptions.piece ? ' — '+selectedOptions.piece : '') + (selectedOptions.finish ? ' ('+selectedOptions.finish+')' : '')
+  });
+  updateCart(); closeModal();
+}
+function closeModal() { document.getElementById('product-modal').classList.remove('open'); }
+function updateCart() {
+  document.getElementById('cart-count').textContent = cart.length;
+  document.getElementById('cart-items').innerHTML = cart.map(p => `<div class="cart-item"><span>${p.displayName||p.name}</span><span>$${p.price}</span></div>`).join('');
+  const total = cart.reduce((s,p)=>s+p.price,0);
+  document.getElementById('cart-total').textContent = cart.length ? `Total: $${total}` : '';
+}
+function toggleCart() { document.getElementById('cart').classList.toggle('open'); }
+function selectShipping(el, cost) {
+  document.querySelectorAll('.shipping-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected'); shippingCost = cost; updateCheckoutTotal();
+}
+function updateCheckoutTotal() {
+  const total = cart.reduce((s,p)=>s+p.price,0) + shippingCost;
+  document.getElementById('checkout-total').textContent = '$'+total;
+  document.getElementById('payment-total').textContent = '$'+total;
+}
+function startCheckout() {
+  if (!cart.length) { alert('Your cart is empty.'); return; }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('cart').classList.remove('open');
+  document.querySelectorAll('.checkout-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('checkout-review').classList.add('active');
+  document.getElementById('checkout-items').innerHTML = cart.map(p => `<div class="checkout-item"><span>${p.displayName||p.name}</span><span>$${p.price}</span></div>`).join('');
+  shippingCost = 0; updateCheckoutTotal(); window.scrollTo(0,0);
+}
+function goToPayment() { document.querySelectorAll('.checkout-page').forEach(p => p.classList.remove('active')); document.getElementById('checkout-payment').classList.add('active'); updateCheckoutTotal(); window.scrollTo(0,0); }
+function backToReview() { document.querySelectorAll('.checkout-page').forEach(p => p.classList.remove('active')); document.getElementById('checkout-review').classList.add('active'); window.scrollTo(0,0); }
+function placeOrder() { document.querySelectorAll('.checkout-page').forEach(p => p.classList.remove('active')); document.getElementById('checkout-confirm').classList.add('active'); cart=[]; updateCart(); window.scrollTo(0,0); }
+function backToShop() { document.querySelectorAll('.checkout-page').forEach(p => p.classList.remove('active')); showPage('home'); }
+
+function filterProducts(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.product').forEach(el => {
+    const name = el.querySelector('h3')?.textContent.toLowerCase() || '';
+    el.style.display = name.includes(q) ? '' : 'none';
+  });
+}
+
+renderCategoryGrids();
+
+window.addEventListener('scroll', () => {
+  const about = document.querySelector('.about-section');
+  const layerTwo = document.querySelector('.layer-two');
+  if (!about || !layerTwo) return;
+  const rect = about.getBoundingClientRect();
+  if (rect.top < 80) layerTwo.classList.add('visible');
+  else layerTwo.classList.remove('visible');
+});
+</script>
+</body>
+</html>
